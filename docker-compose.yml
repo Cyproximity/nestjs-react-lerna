@@ -1,0 +1,26 @@
+version: '3.8'
+services:
+  dev-db:
+    image: postgres:15
+    ports:
+      - 5455:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nest
+    networks:
+      - nestnw
+
+  test-db:
+    image: postgres:15
+    ports:
+      - 5466:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nest
+    networks:
+      - nestnw
+
+networks:
+  nestnw:
