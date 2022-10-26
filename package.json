@@ -95,7 +95,7 @@
     "testEnvironment": "node"
   },
   "lint-staged": {
-    "**/*.(t|j)s$": [
+    "*.(t|j)s$": [
       "eslint --cache --fix",
       "prettier --ignore-unknown --write"
     ]
