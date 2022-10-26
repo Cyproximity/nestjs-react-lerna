@@ -46,11 +46,7 @@ describe("App e2e", () => {
 
     describe("Sign Up", () => {
       it("should signup using email and password", () => {
-        return pactum
-          .spec()
-          .post("/auth/signup")
-          .withBody(user)
-          .expectStatus(201);
+        return pactum.spec().post("/auth/signup").withBody(user).expectStatus(201);
       });
 
       it("should throw if is email invalid", () => {
@@ -68,9 +64,7 @@ describe("App e2e", () => {
           .post("/auth/signup")
           .withBody({ email: user.email, password: "xxx" })
           .expectStatus(400)
-          .expectBodyContains(
-            "password: String must contain at least 6 character(s)",
-          );
+          .expectBodyContains("password: String must contain at least 6 character(s)");
       });
 
       it("should throw if the email or password is empty", () => {
@@ -110,9 +104,7 @@ describe("App e2e", () => {
           .post("/auth/signup")
           .withBody({ email: user.email, password: "xxx" })
           .expectStatus(400)
-          .expectBodyContains(
-            "password: String must contain at least 6 character(s)",
-          );
+          .expectBodyContains("password: String must contain at least 6 character(s)");
       });
 
       it("should throw if the email or password is empty", () => {
@@ -130,19 +122,11 @@ describe("App e2e", () => {
   describe("Users", () => {
     describe("Get me", () => {
       it("should get the current user", () => {
-        return pactum
-          .spec()
-          .get("/users/me")
-          .withHeaders(auth)
-          .expectStatus(200);
+        return pactum.spec().get("/users/me").withHeaders(auth).expectStatus(200);
       });
 
       it("should throw if token is invalid", () => {
-        return pactum
-          .spec()
-          .get("/users/me")
-          .withHeaders({ Authorization: `Bearer zxy` })
-          .expectStatus(401);
+        return pactum.spec().get("/users/me").withHeaders({ Authorization: `Bearer zxy` }).expectStatus(401);
       });
 
       it("should throw if token is not present", () => {
@@ -156,12 +140,7 @@ describe("App e2e", () => {
 
     describe("Edit current user", () => {
       it("should update the user name", () => {
-        return pactum
-          .spec()
-          .patch("/users")
-          .withHeaders(auth)
-          .withBody(editUser)
-          .expectBodyContains(editUser.name);
+        return pactum.spec().patch("/users").withHeaders(auth).withBody(editUser).expectBodyContains(editUser.name);
       });
 
       it("should throw if email is invalid", () => {
@@ -201,12 +180,7 @@ describe("App e2e", () => {
 
     describe("Get All Bookmarks", () => {
       it("should get all bookmark", () => {
-        return pactum
-          .spec()
-          .get("/bookmarks")
-          .withHeaders(auth)
-          .expectStatus(200)
-          .expectJsonLength(1);
+        return pactum.spec().get("/bookmarks").withHeaders(auth).expectStatus(200).expectJsonLength(1);
       });
 
       it("should throw if user uses invalid token", () => {
@@ -242,8 +216,8 @@ describe("App e2e", () => {
       const editBookmark: UpdateBookmarkDto = {
         title: "Updated bookmark",
         link: "https://www.youtube.com/watch?v=GHTA143_b-s&t=12538s",
-        description: "update bookmark description"
-      }
+        description: "update bookmark description",
+      };
 
       it("should edit a new bookmark", () => {
         return pactum
@@ -270,12 +244,7 @@ describe("App e2e", () => {
       });
 
       it("should get empty bookmarks", () => {
-        return pactum
-          .spec()
-          .get("/bookmarks")
-          .withHeaders(auth)
-          .expectStatus(200)
-          .expectJsonLength(0);
+        return pactum.spec().get("/bookmarks").withHeaders(auth).expectStatus(200).expectJsonLength(0);
       });
     });
   });
