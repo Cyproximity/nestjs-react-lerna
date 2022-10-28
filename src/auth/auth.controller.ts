@@ -1,14 +1,18 @@
 import {
   Body,
   Controller,
+  Get,
   Header,
   HttpCode,
   HttpStatus,
   Post,
+  UseGuards,
 } from "@nestjs/common";
-import { ApiOkResponse, ApiResponse } from "@nestjs/swagger";
+import { ApiResponse } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
+import { GetUser } from "./decorator";
 import { AuthDto } from "./dto";
+import { AccessTokenGuard, RefreshTokenGuard } from "./guard";
 
 @Controller("auth")
 export class AuthController {
@@ -34,5 +38,18 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async signin(@Body() dto: AuthDto): Promise<{ access_token: string }> {
     return this.authService.signin(dto);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Get("logout")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(@GetUser() user: any) {
+    return await this.authService.logout(user.tokenid, user.accessToken);
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Get("refresh")
+  async refresh(@GetUser() token: any, @GetUser("user") user: any) {
+    return this.authService.refresh(token, user);
   }
 }

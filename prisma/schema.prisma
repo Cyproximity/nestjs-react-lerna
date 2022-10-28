@@ -10,13 +10,45 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Token {
+  id Int @id @default(autoincrement())
+
+  user User @relation(fields: [uid], references: [id], onDelete: Cascade)
+  uid Int
+  hash String?
+  isValid Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tokens")
+}
+
+enum SystemRole {
+  // can manage all system
+  Admin
+
+  // users can create, read, update and delete own stuff
+  User
+
+  // mods can create, read, update and delete own stuff
+  // mods can ban or deactivate user
+  // mods cant delete user
+  Moderator
+}
+
 model User {
   id Int @id @default(autoincrement())
-  bookmarks Bookmark[]
 
   name String?
+  displayName String?
+  username String? @unique
   email String @unique
   hash String
+
+  bookmarks Bookmark[]
+  tokens Token[]
+  role SystemRole @default(User)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -12,11 +12,11 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { GetUser } from "../auth/decorator";
-import { JwtGuard } from "../auth/guard";
+import { AccessTokenGuard } from "../auth/guard";
 import { BookmarkService } from "./bookmark.service";
 import { CreateBookmarkDto, UpdateBookmarkDto } from "./dto";
 
-@UseGuards(JwtGuard)
+@UseGuards(AccessTokenGuard)
 @Controller("bookmarks")
 export class BookmarkController {
   constructor(private bookmarkService: BookmarkService) {}

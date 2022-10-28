@@ -2,10 +2,12 @@ import { ForbiddenException, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { User, Token } from "@prisma/client";
 import * as argon from "argon2";
 
 import { PrismaService } from "../prisma/prisma.service";
 import { AuthDto } from "./dto";
+import { AuthCacheService } from './cache.service';
 
 @Injectable({})
 export class AuthService {
@@ -13,20 +15,73 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
+    private cache: AuthCacheService
   ) {}
 
-  async signup(dto: AuthDto) {
+  async signToken(
+    payload: IPayload,
+    secret: string,
+    expiresIn: string,
+  ): Promise<string> {
+    const token = await this.jwt.signAsync(payload, {
+      secret: this.config.get(secret),
+      expiresIn,
+    });
+
+    // returns access token
+    return token;
+  }
+
+  async generateTokens(user: User) {
+    // create initial user->token to get its token.id
+    const token = await this.prisma.token.create({
+      data: { uid: user.id },
+    });
+
+    const accessTokenPayload = {
+      sub: user.id,
+      tokenid: token.id,
+      email: user.email,
+    };
+
+    // token id as refrsh token sub
+    const refreshTokenPayload = {
+      sub: token.id,
+      email: user.email,
+    };
+
+    const [access_token, refresh_token] = await Promise.all([
+      this.signToken(accessTokenPayload, "JWT_SECRET", "1d"),
+      this.signToken(refreshTokenPayload, "JWT_REFRESH_SECRET", "7d"),
+    ]);
+
+    const tokenhash = await argon.hash(refresh_token);
+
+    await this.prisma.token.update({
+      where: { id: token.id },
+      data: { hash: tokenhash, isValid: true },
+    });
+
+    return { access_token, refresh_token };
+  }
+
+  async signup(
+    dto: AuthDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     // generates password hash
     const hash = await argon.hash(dto.password);
 
     try {
       // save the email & hash to user.db
       const user = await this.prisma.user.create({
-        data: { hash, email: dto.email },
+        data: {
+          hash,
+          email: dto.email,
+          username: `user${Date.now()}`,
+        },
       });
 
-      // returns user obj
-      return this.signToken(user.id, user.email);
+      return this.generateTokens(user);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2002") {
@@ -37,7 +92,9 @@ export class AuthService {
     }
   }
 
-  async signin(dto: AuthDto) {
+  async signin(
+    dto: AuthDto,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -53,27 +110,31 @@ export class AuthService {
     // if invalid password
     if (!pwVerify) throw new ForbiddenException("Credentials incorrect.");
 
-    return this.signToken(user.id, user.email);
+    return this.generateTokens(user);
   }
 
-  async signToken(
-    userId: number,
-    email: string,
-  ): Promise<{ access_token: string }> {
-    const payload = {
-      sub: userId,
-      email: email,
-    };
-
-    const secret = this.config.get("JWT_SECRET");
-
-    // generate access token for 15 minutes
-    const access_token = await this.jwt.signAsync(payload, {
-      secret: secret,
-      expiresIn: "15m",
-    });
-
-    // returns access token
-    return { access_token };
+  async refresh(
+    token: Token,
+    user: User,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    await this.prisma.token.delete({ where: { id: token.id } });
+    return this.generateTokens(user);
   }
+
+  async logout(tokenid: number, accessToken: string): Promise<void> {
+    try {
+      await this.cache.setIgnoreToken(accessToken);
+      await this.prisma.token.delete({ where: { id: tokenid } });
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === "P2025") throw new ForbiddenException();
+      }
+      throw error;
+    }
+  }
+}
+
+interface IPayload {
+  sub: number;
+  email: string;
 }
