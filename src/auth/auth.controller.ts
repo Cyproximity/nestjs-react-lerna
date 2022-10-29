@@ -10,7 +10,7 @@ import {
 } from "@nestjs/common";
 import { ApiResponse } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
-import { GetUser } from "./decorator";
+import { GetUser } from "../decorator";
 import { AuthDto } from "./dto";
 import { AccessTokenGuard, RefreshTokenGuard } from "./guard";
 

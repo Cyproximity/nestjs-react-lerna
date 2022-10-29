@@ -1,8 +1,15 @@
-import { Body, Controller, Get, Patch, UseGuards } from "@nestjs/common";
-import { User } from "@prisma/client";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  UseGuards,
+} from "@nestjs/common";
+import { SystemRole, User } from "@prisma/client";
 
-import { AccessTokenGuard } from "../auth/guard";
-import { GetUser } from "../auth/decorator";
+import { AccessTokenGuard, RolesGuard } from "../auth/guard";
+import { GetUser, Roles } from "../decorator";
 import { EditUserDto } from "./dto";
 import { UserService } from "./user.service";
 
@@ -22,5 +29,17 @@ export class UserController {
     @Body() dto: EditUserDto,
   ): Promise<User> {
     return this.userService.editUser(id, dto);
+  }
+
+  @Roles(SystemRole.User)
+  @Patch("bans/:id")
+  async banUser() {}
+
+  @Roles(SystemRole.Admin)
+  @UseGuards(RolesGuard)
+  @Delete()
+  async deleteUser() {
+    // return this.userService.delete
+    return "deleting user";
   }
 }
