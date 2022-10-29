@@ -12,12 +12,13 @@ import { ApiResponse } from "@nestjs/swagger";
 import { AuthService } from "./auth.service";
 import { GetUser } from "../decorator";
 import { AuthDto } from "./dto";
-import { AccessTokenGuard, RefreshTokenGuard } from "./guard";
+import { AccessTokenGuard, JWTRedirectGuard, RefreshTokenGuard } from "./guard";
 
 @Controller("auth")
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @UseGuards(JWTRedirectGuard)
   @ApiResponse({
     status: HttpStatus.CREATED,
     type: AuthDto,
@@ -28,6 +29,7 @@ export class AuthController {
     return this.authService.signup(dto);
   }
 
+  @UseGuards(JWTRedirectGuard)
   @ApiResponse({
     status: HttpStatus.OK,
     type: AuthDto,

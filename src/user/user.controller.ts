@@ -31,13 +31,15 @@ export class UserController {
     return this.userService.editUser(id, dto);
   }
 
-  @Roles(SystemRole.User)
+  @Roles(SystemRole.Admin, SystemRole.Moderator)
   @Patch("bans/:id")
-  async banUser() {}
+  async toggleBan() {
+    return "banning user";
+  }
 
   @Roles(SystemRole.Admin)
   @UseGuards(RolesGuard)
-  @Delete()
+  @Delete(":id")
   async deleteUser() {
     // return this.userService.delete
     return "deleting user";
