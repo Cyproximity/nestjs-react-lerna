@@ -1,18 +1,17 @@
-import { Inject, Injectable, CACHE_MANAGER } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
-import { Cache } from "cache-manager";
 import { PrismaService } from "../../prisma/prisma.service";
-import { AuthCacheService } from "../cache.service";
+import { CacheService } from "../../cache/cache.service";
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, "jwt") {
   constructor(
     config: ConfigService,
     private prisma: PrismaService,
-    private cache: AuthCacheService,
+    private cache: CacheService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

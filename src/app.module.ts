@@ -5,6 +5,7 @@ import { UserModule } from "./user/user.module";
 import { BookmarkModule } from "./bookmark/bookmark.module";
 import { AuthModule } from "./auth/auth.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { AppCacheModule } from "./cache/cache.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     CacheModule.register({
       isGlobal: true,
     }),
+    AppCacheModule,
     PrismaModule,
     AuthModule,
     UserModule,

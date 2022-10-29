@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { Cache } from "cache-manager";
 
 @Injectable({})
-export class AuthCacheService {
+export class CacheService {
   constructor(
     private config: ConfigService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,

@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
-import { AbilityFactory } from './ability.factory';
+import { Module } from "@nestjs/common";
+import { AbilityFactory } from "./ability.factory";
 
 @Module({
-  providers: [AbilityFactory]
+  providers: [AbilityFactory],
 })
 export class AbilityModule {}

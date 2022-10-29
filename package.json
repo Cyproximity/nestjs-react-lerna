@@ -28,11 +28,15 @@
     "db:test:rm": "docker-compose rm -s -f -v test-db",
     "db:test:up": "docker-compose up -d test-db",
     "db:test:restart": "npm run db:test:rm && npm run db:test:up && sleep 2 && npm run prisma:test:deploy",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prisma:studio:test": "dotenv -e .env.test -- npx prisma studio",
+    "prisma:studio": "npx prisma studio"
   },
   "dependencies": {
     "@anatine/zod-nestjs": "^1.8.0",
     "@anatine/zod-openapi": "^1.10.0",
+    "@casl/ability": "^6.3.1",
+    "@casl/prisma": "^1.3.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",

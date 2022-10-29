@@ -7,7 +7,7 @@ import * as argon from "argon2";
 
 import { PrismaService } from "../prisma/prisma.service";
 import { AuthDto } from "./dto";
-import { AuthCacheService } from './cache.service';
+import { CacheService } from "../cache/cache.service";
 
 @Injectable({})
 export class AuthService {
@@ -15,7 +15,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-    private cache: AuthCacheService
+    private cache: CacheService,
   ) {}
 
   async signToken(
@@ -25,10 +25,8 @@ export class AuthService {
   ): Promise<string> {
     const token = await this.jwt.signAsync(payload, {
       secret: this.config.get(secret),
-      expiresIn,
+      expiresIn: this.config.get(expiresIn),
     });
-
-    // returns access token
     return token;
   }
 
@@ -51,8 +49,12 @@ export class AuthService {
     };
 
     const [access_token, refresh_token] = await Promise.all([
-      this.signToken(accessTokenPayload, "JWT_SECRET", "1d"),
-      this.signToken(refreshTokenPayload, "JWT_REFRESH_SECRET", "7d"),
+      this.signToken(accessTokenPayload, "JWT_SECRET", "JWT_SECRET_TTL"),
+      this.signToken(
+        refreshTokenPayload,
+        "JWT_REFRESH_SECRET",
+        "JWT_REFRESH_SECRET_TTL",
+      ),
     ]);
 
     const tokenhash = await argon.hash(refresh_token);

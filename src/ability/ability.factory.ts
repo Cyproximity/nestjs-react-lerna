@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable } from "@nestjs/common";
+import { CreateAbility } from "@casl/ability";
+import { PrismaQuery } from "@casl/prisma";
+import { User } from "@prisma/client";
+import { createMongoAbility } from "@casl/ability";
 
-export enum Action {
-  Manage = 'manage',
-  Create = 'create',
-  Read = 'read',
-  Update = 'update',
-  Delete = 'delete',
-}
+type Actions = "create" | "read" | "update" | "delete";
+type Subjects = "Article" | "Comment" | "User";
+
+const ability = createMongoAbility<[Actions, Subjects]>();
 
 @Injectable()
-export class AbilityFactory {
-}
+export class AbilityFactory {}
