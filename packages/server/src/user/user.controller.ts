@@ -4,9 +4,11 @@ import {
   Delete,
   Get,
   Patch,
+  Res,
   UseGuards,
 } from "@nestjs/common";
 import { SystemRole, User } from "@prisma/client";
+import { Response } from "express";
 
 import { AccessTokenGuard, RolesGuard } from "../auth/guard";
 import { GetUser, Roles } from "../decorator";
@@ -19,7 +21,10 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Get("me")
-  getMe(@GetUser() user: User): User {
+  getMe(
+    @Res({ passthrough: true }) res: Response,
+    @GetUser() user: User,
+  ): User {
     return user;
   }
 

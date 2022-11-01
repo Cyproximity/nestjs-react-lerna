@@ -21,15 +21,22 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, "jwt") {
   }
 
   async validate(req: Request, payload: any) {
-    const accessToken = req.get("Authorization").replace("Bearer", "").trim();
-    const ignoredTokens = await this.cache.getIngoredTokens();
+    const authorization = req.get("Authorization");
+    let accessToken: string = "";
 
-    if (
-      ignoredTokens &&
-      ignoredTokens.size > 0 &&
-      ignoredTokens.has(accessToken)
-    ) {
-      return null;
+    if (authorization) {
+      accessToken = authorization.replace("Bearer", "").trim();
+    }
+
+    if (accessToken) {
+      const ignoredTokens = await this.cache.getIngoredTokens();
+      if (
+        ignoredTokens &&
+        ignoredTokens.size > 0 &&
+        ignoredTokens.has(accessToken)
+      ) {
+        return null;
+      }
     }
 
     try {
@@ -41,7 +48,11 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, "jwt") {
 
       delete user.hash;
 
-      return { tokenid: payload?.tokenid, ...user, accessToken };
+      if (req.url == "/auth/logout") {
+        await this.cache.setIgnoreToken(accessToken);
+      }
+
+      return { tokenid: payload?.tokenid, ...user };
     } catch (e) {
       return null;
     }

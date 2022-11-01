@@ -8,7 +8,7 @@
     "lerna": "^6.0.1"
   },
   "scripts": {
-    "test:e2e:watch":"cd packages/server && yarn test:e2e:watch",
+    "test:e2e:watch": "cd packages/server && yarn run test:e2e:watch",
     "webapp:watch": "lerna run dev",
     "server:watch": "lerna run start:dev"
   }

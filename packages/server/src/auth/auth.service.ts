@@ -7,7 +7,6 @@ import * as argon from "argon2";
 
 import { PrismaService } from "../prisma/prisma.service";
 import { AuthDto } from "./dto";
-import { CacheService } from "../cache/cache.service";
 
 @Injectable({})
 export class AuthService {
@@ -15,7 +14,6 @@ export class AuthService {
     private prisma: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-    private cache: CacheService,
   ) {}
 
   async signToken(
@@ -115,17 +113,26 @@ export class AuthService {
     return this.generateTokens(user);
   }
 
-  async refresh(
-    token: Token,
-    user: User,
-  ): Promise<{ access_token: string; refresh_token: string }> {
-    await this.prisma.token.delete({ where: { id: token.id } });
-    return this.generateTokens(user);
+  async refresh(token: Token, user: User): Promise<any> {
+    try {
+      const checktoken = this.prisma.token.findUnique({
+        where: { id: token.id },
+      });
+      if (!checktoken) {
+        throw new ForbiddenException();
+      }
+      await this.prisma.token.delete({ where: { id: token.id } });
+      return this.generateTokens(user);
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        if (error.code === "P2025") throw new ForbiddenException();
+      }
+      throw error;
+    }
   }
 
-  async logout(tokenid: number, accessToken: string): Promise<void> {
+  async logout(tokenid: number): Promise<void> {
     try {
-      await this.cache.setIgnoreToken(accessToken);
       await this.prisma.token.delete({ where: { id: tokenid } });
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
