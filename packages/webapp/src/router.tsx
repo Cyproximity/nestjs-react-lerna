@@ -1,21 +1,76 @@
-import { createBrowserRouter } from "react-router-dom";
+import { Suspense, lazy } from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import type { RouteObject } from "react-router-dom";
+import Home from "./pages";
+import AuthLayout from "./components/AuthLayout";
+import ProfileLayout from "./components/ProfileLayout";
 
-import App from "./pages/App";
-import { Login, Register } from "./components";
+const Loadable =
+  (Component: React.ComponentType<any>) => (props: JSX.IntrinsicAttributes) =>
+    (
+      <Suspense fallback="">
+        <Component {...props} />
+      </Suspense>
+    );
 
-export default createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
+// lazyloads / dynamic import
+const ProfilePage = Loadable(lazy(() => import("./pages/profile")));
+const SignInPage = Loadable(lazy(() => import("./pages/auth/signin")));
+const SignUpPage = Loadable(lazy(() => import("./pages/auth/signup")));
+
+export default function router(user: any) {
+  console.log(user);
+
+  const authRoutes: RouteObject = {
+    path: "auth",
+    element: <AuthLayout />,
     children: [
       {
-        path: "auth/login",
-        element: <Login />,
+        index: true,
+        path: "signin",
+        element: <SignInPage />,
       },
       {
-        path: "auth/register",
-        element: <Register></Register>,
+        path: "signup",
+        element: <SignUpPage />,
+      },
+      {
+        path: "",
+        element: <Navigate to="/auth/signin" replace />,
       },
     ],
-  },
-]);
+  };
+
+  const generalRoutes: RouteObject = {
+    path: "",
+    children: [
+      {
+        index: true,
+        element: <Home />,
+      },
+    ],
+  };
+
+  const profileRoutes: RouteObject = {
+    path: "",
+    element: <ProfileLayout />,
+    children: [
+      {
+        index: true,
+        element: <ProfilePage />,
+      },
+    ],
+  };
+
+  const routes: RouteObject[] = [];
+
+  if (user.isLoggedIn) {
+    routes.push(profileRoutes);
+  } else {
+    routes.push(authRoutes);
+    routes.push(generalRoutes);
+  }
+
+  const cbr = createBrowserRouter(routes);
+  return cbr;
+}

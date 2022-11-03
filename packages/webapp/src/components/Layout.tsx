@@ -1,13 +1,12 @@
 import { Outlet } from "react-router-dom";
 
-function Homepage() {
+export function Layout() {
   return (
     <>
-      <h1>Home</h1>
+      Layout Thingy
       <main>
         <Outlet />
       </main>
     </>
   );
 }
-export default Homepage;

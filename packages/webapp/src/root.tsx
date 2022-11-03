@@ -1,15 +1,21 @@
-import React from "react";
 import { RouterProvider } from "react-router-dom";
-import CssBaseline from "@mui/material/CssBaseline";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Router from "./router";
-import { Button } from "theme-ui";
+import AuthMiddleware from "./middleware/AuthMiddleware";
+import { userStore } from "./stores";
+
+const queryClient = new QueryClient();
 
 export default function Root() {
+  const user = userStore();
+
   return (
-    <>
-      <CssBaseline />
-      <RouterProvider router={Router} />
-      <Button>test</Button>
-    </>
+    <QueryClientProvider client={queryClient}>
+      <AuthMiddleware>
+        <RouterProvider router={Router(user)} />
+      </AuthMiddleware>
+      <ReactQueryDevtools />
+    </QueryClientProvider>
   );
 }
