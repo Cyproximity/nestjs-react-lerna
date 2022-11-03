@@ -34,6 +34,7 @@ export class AuthController {
   ): Promise<{ access_token: string }> {
     const tokens = await this.authService.signup(dto);
     res.cookie("rtjwt", tokens.refresh_token, { httpOnly: true });
+    res.cookie("loggedin", true, {});
     return tokens;
   }
 
@@ -52,6 +53,7 @@ export class AuthController {
   ): Promise<{ access_token: string }> {
     const tokens = await this.authService.signin(dto);
     res.cookie("rtjwt", tokens.refresh_token, { httpOnly: true });
+    res.cookie("loggedin", true, {});
     return tokens;
   }
 
@@ -63,6 +65,7 @@ export class AuthController {
     @GetUser() user: any,
   ) {
     res.clearCookie("rtjwt");
+    res.clearCookie("loggedin");
     return await this.authService.logout(user.tokenid);
   }
 
@@ -75,6 +78,7 @@ export class AuthController {
   ) {
     const tokens = await this.authService.refresh(token, user);
     res.cookie("rtjwt", tokens.refresh_token, { httpOnly: true });
+    res.cookie("loggedin", true, {});
     return tokens;
   }
 }
