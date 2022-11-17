@@ -1,5 +1,11 @@
 version: '3.8'
 services:
+  redis:
+    image: redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=true
+    ports:
+      - 6379:6379
   dev-db:
     image: postgres:15
     ports:

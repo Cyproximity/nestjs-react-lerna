@@ -3,6 +3,5 @@ import { userStore } from "../stores";
 
 export function Bookmark() {
   const user = userStore();
-  useEffect(() => {}, []);
   return <></>;
 }

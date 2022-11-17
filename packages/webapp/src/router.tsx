@@ -1,32 +1,24 @@
-import { Suspense, lazy } from "react";
+import React from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import type { RouteObject } from "react-router-dom";
-import Home from "./pages";
-import AuthLayout from "./components/AuthLayout";
-import ProfileLayout from "./components/ProfileLayout";
+import { QueryClient } from "@tanstack/react-query";
 
-const Loadable =
-  (Component: React.ComponentType<any>) => (props: JSX.IntrinsicAttributes) =>
-    (
-      <Suspense fallback="">
-        <Component {...props} />
-      </Suspense>
-    );
+import Root, { loader as RootLoader } from "./pages/root";
+import AuthLayout from "./layouts/AuthLayout";
+import ProfileLayout from "./layouts/ProfileLayout";
+import BookmarkLayout from "./layouts/BookmarkLayout";
 
-// lazyloads / dynamic import
-const ProfilePage = Loadable(lazy(() => import("./pages/profile")));
-const SignInPage = Loadable(lazy(() => import("./pages/auth/signin")));
-const SignUpPage = Loadable(lazy(() => import("./pages/auth/signup")));
+import ProfilePage from "./pages/profile";
+import SignInPage from "./pages/auth/signin";
+import SignUpPage from "./pages/auth/signup";
+import BookmarkPage, { loader as bookmarkLoader } from "./pages/bookmark";
 
-export default function router(user: any) {
-  console.log(user);
-
+export default function router(user: any, queryClient: QueryClient) {
   const authRoutes: RouteObject = {
     path: "auth",
     element: <AuthLayout />,
     children: [
       {
-        index: true,
         path: "signin",
         element: <SignInPage />,
       },
@@ -34,19 +26,17 @@ export default function router(user: any) {
         path: "signup",
         element: <SignUpPage />,
       },
-      {
-        path: "",
-        element: <Navigate to="/auth/signin" replace />,
-      },
     ],
   };
 
-  const generalRoutes: RouteObject = {
-    path: "",
+  const bookmarkRoutes: RouteObject = {
+    path: "bookmarks",
+    element: <BookmarkLayout />,
     children: [
       {
         index: true,
-        element: <Home />,
+        loader: bookmarkLoader(queryClient),
+        element: <BookmarkPage />,
       },
     ],
   };
@@ -62,15 +52,15 @@ export default function router(user: any) {
     ],
   };
 
-  const routes: RouteObject[] = [];
+  let children: RouteObject[] = [];
 
-  if (user.isLoggedIn) {
-    routes.push(profileRoutes);
-  } else {
-    routes.push(authRoutes);
-    routes.push(generalRoutes);
-  }
+  const routes: RouteObject[] = [
+    {
+      path: "/",
+      loader: RootLoader(queryClient),
+      children: children,
+    },
+  ];
 
-  const cbr = createBrowserRouter(routes);
-  return cbr;
+  return createBrowserRouter(routes);
 }

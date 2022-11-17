@@ -21,10 +21,6 @@ const AuthMiddleware: React.FC<AuthMiddlewareProps> = ({ children }) => {
     },
   });
 
-  if (query.isLoading && isLoggedIn) {
-    return <>Loading...</>;
-  }
-
   return children;
 };
 

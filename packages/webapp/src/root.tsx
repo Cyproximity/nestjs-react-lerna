@@ -12,9 +12,9 @@ export default function Root() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthMiddleware>
-        <RouterProvider router={Router(user)} />
-      </AuthMiddleware>
+      {/* <AuthMiddleware> */}
+      <RouterProvider router={Router(user, queryClient)} />
+      {/* </AuthMiddleware> */}
       <ReactQueryDevtools />
     </QueryClientProvider>
   );

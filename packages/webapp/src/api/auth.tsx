@@ -64,3 +64,8 @@ export const getMe = async () => {
   const res = await apiAuth.get("/users/me");
   return res.data;
 };
+
+export const getBookmarks = async () => {
+  const res = await apiAuth.get("/bookmarks");
+  return res.data;
+};

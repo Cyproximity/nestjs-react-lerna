@@ -13,9 +13,9 @@ datasource db {
 model Token {
   id Int @id @default(autoincrement())
 
-  user User @relation(fields: [uid], references: [id], onDelete: Cascade)
-  uid Int
-  hash String?
+  user    User    @relation(fields: [uid], references: [id], onDelete: Cascade)
+  uid     Int
+  hash    String?
   isValid Boolean @default(false)
 
   createdAt DateTime @default(now())
@@ -40,31 +40,50 @@ enum SystemRole {
 model User {
   id Int @id @default(autoincrement())
 
-  name String?
+  name        String?
   displayName String?
-  username String? @unique
-  email String @unique
-  hash String
+  username    String? @unique
+  email       String  @unique
+  hash        String
+  avatar      Int?
 
   bookmarks Bookmark[]
-  tokens Token[]
+  tokens    Token[]
+  photos    Photo[]
+
   role SystemRole @default(User)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("users")
 }
 
 model Bookmark {
-  id Int @id @default(autoincrement())
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId Int
 
-  title String
+  title       String
   description String?
-  link String
+  link        String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("bookmarks")
+}
+
+model Photo {
+  id Int @id @default(autoincrement())
+
+  scope     String?
+  path      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [uid], references: [id], onDelete: Cascade)
+  uid       Int
+
+  optimized Boolean @default(false)
+
+  @@map("photos")
 }
